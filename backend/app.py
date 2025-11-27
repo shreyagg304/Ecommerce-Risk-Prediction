@@ -13,6 +13,7 @@ from utils import (
     compute_marketplace_stats,
     compute_category_risk,
     compute_seller_trend,
+    compute_category_trend,
     load_model_stats,
     get_seller_marketplace
 )
@@ -142,6 +143,29 @@ def predict_seller_order():
     log_prediction(order, result, DATA_DIR)
 
     return jsonify(result)
+
+
+@app.route("/marketplace_category_trend")
+def marketplace_category_trend():
+    """
+    Query params:
+      - marketplace_id (optional)
+      - category (optional)  -> if present, API will filter to that category's series only
+    """
+    marketplace_id = request.args.get("marketplace_id")
+    category = request.args.get("category")
+
+    orders = load_orders(DATA_DIR)
+    preds = load_batch_predictions(DATA_DIR)
+
+    res = compute_category_trend(orders, preds, marketplace_id=marketplace_id, top_n=8)
+
+    # If user requested a single category, return just that one series (if available)
+    if category:
+        found = [s for s in res.get("series", []) if s["category"] == category]
+        return jsonify({"series": found, "requested_category": category, "top_categories": res.get("top_categories", [])})
+
+    return jsonify(res)
 
 
 if __name__ == "__main__":

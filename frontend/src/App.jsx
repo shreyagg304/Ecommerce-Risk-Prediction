@@ -45,7 +45,7 @@ export default function App() {
             <select
               value={marketplace}
               onChange={(e) => setMarketplace(e.target.value)}
-              className="bg-transparent text-gray-200 focus:outline-none"
+              className="bg-base-800/90 text-white focus:outline-none"
             >
               <option>M001</option>
               <option>M002</option>

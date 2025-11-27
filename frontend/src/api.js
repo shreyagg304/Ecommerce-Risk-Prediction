@@ -39,3 +39,10 @@ export const predictOrder = (sid, order) => {
     order: cleanOrder
   });
 };
+
+export function getCategoryTrend(marketplaceId, category = "") {
+  const params = new URLSearchParams();
+  if (marketplaceId) params.append("marketplace_id", marketplaceId);
+  if (category) params.append("category", category);
+  return axios.get(`${BASE}/marketplace_category_trend?${params.toString()}`);
+}
