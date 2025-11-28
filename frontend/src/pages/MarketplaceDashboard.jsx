@@ -109,7 +109,7 @@ export default function MarketplaceDashboard({ marketplaceId, onViewSeller }) {
   );
 
   // Build chart-ready data rows: { date, Electronics:0.12, Clothing:0.22, ... }
-  const categoryTrendChart = allDates.map((d) => {
+  let categoryTrendChart = allDates.map((d) => {
     const row = { date: d };
     activeSeries.forEach((s) => {
       const found = s.points.find((p) => p.date === d);
