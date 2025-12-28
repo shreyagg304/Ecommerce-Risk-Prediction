@@ -53,7 +53,12 @@ export default function MarketplaceDashboard({ marketplaceId, onViewSeller }) {
 
   let filteredTrend = stats?.trend ? [...stats.trend] : [];
   if (timeRange !== "all" && filteredTrend.length) {
-    const cutoff = new Date();
+    // Find latest date in dataset
+    const dates = filteredTrend.map(t => new Date(t.date));
+    const maxDate = new Date(Math.max(...dates));
+
+    // Compute cutoff relative to latest data point
+    const cutoff = new Date(maxDate);
     cutoff.setDate(cutoff.getDate() - parseInt(timeRange));
 
     filteredTrend = filteredTrend.filter(
@@ -119,8 +124,11 @@ export default function MarketplaceDashboard({ marketplaceId, onViewSeller }) {
   });
 
   // Apply time filter to category trend
-  if (timeRange !== "all") {
-    const cutoff = new Date();
+  if (timeRange !== "all" && categoryTrendChart.length) {
+    const dates = categoryTrendChart.map(r => new Date(r.date));
+    const maxDate = new Date(Math.max(...dates));
+
+    const cutoff = new Date(maxDate);
     cutoff.setDate(cutoff.getDate() - parseInt(timeRange));
 
     categoryTrendChart = categoryTrendChart.filter(

@@ -1,5 +1,8 @@
 import axios from "axios";
-const BASE = "http://localhost:5000";
+// const BASE = "http://localhost:5000";
+
+const BASE = process.env.REACT_APP_API_BASE || 
+             "https://ecommerce-risk-prediction.onrender.com";
 
 export const getInsights = (mid) =>
   axios.get(`${BASE}/marketplace_stats`, { params: { marketplace_id: mid } });
