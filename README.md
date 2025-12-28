@@ -18,116 +18,116 @@ ReturnRisk simulates how large e-commerce platforms monitor return risk at scale
 
 * Time-based trend filtering (Last 7 / 30 / 90 days)
 
-* All data is generated synthetically to demonstrate real-world workflows.
+All data is generated synthetically to demonstrate real-world workflows.
 
 # 🧠 Key Features
-Marketplace Dashboard
+## Marketplace Dashboard
 
-Total orders & sellers overview
+* Total orders & sellers overview
 
-Overall marketplace health score
+* Overall marketplace health score
 
-Risk trend over time
+* Risk trend over time
 
-Category-level risk distribution
+* Category-level risk distribution
 
-Top risky sellers
+* Top risky sellers
 
-Automated risk alerts
+* Automated risk alerts
 
-Seller Dashboard
+## Seller Dashboard
 
-Seller-specific order history
+* Seller-specific order history
 
-Risk trend over time
+* Risk trend over time
 
-ML model performance metrics
+* ML model performance metrics
 
-Rule-based explanations for elevated risk
+* Rule-based explanations for elevated risk
 
-High return rate
+  * High return rate
 
-High COD usage
+  * High COD usage
 
-Low product ratings
+  * Low product ratings
 
-Consistently high predicted risk
+  * Consistently high predicted risk
 
-Time-Based Filtering
+* Time-Based Filtering
 
-Supports Last 7 / 30 / 90 days
+  * Supports Last 7 / 30 / 90 days
 
-Filters are computed relative to the latest available dataset date, mimicking batch analytics systems used in production
+  * Filters are computed relative to the latest available dataset date, mimicking batch analytics systems used in production
 
 # 🏗️ Architecture
 
 ## Frontend
 
-React
+* React
 
-Recharts (visualization)
+* Recharts (visualization)
 
-Tailwind CSS
+* Tailwind CSS
 
-Deployed on Vercel
+* Deployed on Vercel
 
 ## Backend
 
-Flask
+* Flask
 
-Pandas / NumPy
+* Pandas / NumPy
 
-scikit-learn (Random Forest)
+* scikit-learn (Random Forest)
 
-REST APIs
+* REST APIs
 
-Deployed on Render
+* Deployed on Render
 
-Data
+## Data
 
-Synthetic CSV datasets
+* Synthetic CSV datasets
 
-Generated via custom script
+* Generated via custom script
 
-Committed for deterministic demos
+* Committed for deterministic demos
 
 # 🤖 Machine Learning
 
-Seller-specific Random Forest models
+* Seller-specific Random Forest models
 
-Predicts probability of order return
+* Predicts probability of order return
 
-## Trained on:
+* Trained on:
 
-Product category
+  * Product category
 
-Price & discount
+  * Price & discount
 
-Delivery time
+  * Delivery time
 
-Customer type
+  * Customer type
 
-Payment method
+  * Payment method
 
-Product rating
+  * Product rating
 
-## Model metrics exposed per seller:
+* Model metrics exposed per seller:
 
-Accuracy
+  * Accuracy
 
-Precision
+  * Precision
 
-Recall
+  * Recall
 
-F1 score
+  * F1 score
 
 # 📊 Risk Alerts
 
-## The system automatically flags:
+The system automatically flags:
 
-Sellers with consistently high average risk
+* Sellers with consistently high average risk
 
-Categories with elevated return risk
+* Categories with elevated return risk
 
 Alerts are surfaced directly on the marketplace dashboard.
 
@@ -139,21 +139,25 @@ This mirrors how risk and trust teams justify decisions internally.
 
 # 🌐 Live Demo
 
-Backend: https://ecommerce-risk-prediction.onrender.com
+* Backend: https://ecommerce-risk-prediction.onrender.com
 
-Health Check: /health
+* Health Check: /health
 
 (Frontend deployed separately)
 
 # 🛠️ Local Setup
+
 ## Backend
+
 ```bash
 cd backend
 pip install -r requirements.txt
 python generate_mock_data.py
 python app.py
 ```
+
 ## Frontend
+
 ```bash
 cd frontend
 npm install
@@ -162,26 +166,26 @@ npm start
 
 # 📝 Notes
 
-Data is synthetic and pre-generated for demo stability
+* Data is synthetic and pre-generated for demo stability
 
-The backend uses an ephemeral filesystem (Render), so datasets are committed
+* The backend uses an ephemeral filesystem (Render), so datasets are committed
 
-Time filters are relative to dataset dates, not real-time streaming data
+* Time filters are relative to dataset dates, not real-time streaming data
 
 # 📌 Why this project matters
 
 This project demonstrates:
 
-End-to-end system design
+* End-to-end system design
 
-Practical ML integration
+* Practical ML integration
 
-Analytics-first thinking
+* Analytics-first thinking
 
-Explainability and monitoring
+* Explainability and monitoring
 
-Production-style dashboards
+* Production-style dashboards
 
-Deployment and environment handling
+* Deployment and environment handling
 
 It focuses on clarity, realism, and decision support, not just prediction accuracy.
