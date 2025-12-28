@@ -139,11 +139,11 @@ This mirrors how risk and trust teams justify decisions internally.
 
 # 🌐 Live Demo
 
+* Frontend: https://ecommerce-risk-prediction.vercel.app/
+
 * Backend: https://ecommerce-risk-prediction.onrender.com
 
 * Health Check: /health
-
-(Frontend deployed separately)
 
 # 🛠️ Local Setup
 
