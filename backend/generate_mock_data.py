@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import random
 import os
 
-os.makedirs("./backend/data", exist_ok=True)
+os.makedirs("./data", exist_ok=True)
 # ------------------------------
 # SETTINGS
 # ------------------------------
@@ -51,7 +51,7 @@ for m, seller_list in marketplaces.items():
         })
 
 sellers_df = pd.DataFrame(seller_rows)
-sellers_df.to_csv("./backend/data/sellers.csv", index=False)
+sellers_df.to_csv("./data/sellers.csv", index=False)
 
 print("Created sellers.csv")
 
@@ -99,7 +99,7 @@ for i in range(TOTAL_ROWS):
     })
 
 orders_df = pd.DataFrame(orders)
-orders_df.to_csv("./backend/data/orders.csv", index=False)
+orders_df.to_csv("./data/orders.csv", index=False)
 
 print("Created orders.csv")
 
@@ -124,7 +124,7 @@ for row in orders:
     })
 
 pred_df = pd.DataFrame(pred_rows)
-pred_df.to_csv("./backend/data/batch_predictions.csv", index=False)
+pred_df.to_csv("./data/batch_predictions.csv", index=False)
 
 print("Created batch_predictions.csv")
 print("All mock data generated successfully!")

@@ -174,7 +174,11 @@ export default function MarketplaceDashboard({ marketplaceId, onViewSeller }) {
 
       {/* HEALTH SCORE */}
       <div className="bg-base-800 p-6 rounded-xl border border-base-700 shadow-card">
-        <h3 className="text-sm text-gray-300">Marketplace Health</h3>
+        <h3 className="text-sm text-gray-300">Marketplace Health (Overall)</h3>
+
+        <p className="text-xs text-gray-400 mt-2">
+          Overall score is based on average risk and trends, not individual orders
+        </p>
 
         <p
           className={`text-4xl font-bold mt-1 ${
@@ -191,6 +195,8 @@ export default function MarketplaceDashboard({ marketplaceId, onViewSeller }) {
 
       {/* CARDS */}
       <div className="grid grid-cols-2 gap-6">
+
+        {/* Total Orders */}
         <div className="bg-base-800 p-6 rounded-xl border border-base-700 shadow-card">
           <div className="text-gray-400 text-sm">Total Orders</div>
           <div className="text-3xl font-bold mt-2">
@@ -198,6 +204,7 @@ export default function MarketplaceDashboard({ marketplaceId, onViewSeller }) {
           </div>
         </div>
 
+        {/* Total Sellers */}
         <div className="bg-base-800 p-6 rounded-xl border border-base-700 shadow-card">
           <div className="text-gray-400 text-sm">Total Sellers</div>
           <div className="text-3xl font-bold mt-2">
@@ -205,6 +212,64 @@ export default function MarketplaceDashboard({ marketplaceId, onViewSeller }) {
           </div>
         </div>
       </div>
+
+      <div className="grid grid-cols-3 gap-6 items-start">
+        
+        {/* High Risk Orders */}
+        <div className="bg-base-800 p-6 rounded-xl border border-base-700 shadow-card">
+          <div className="text-gray-400 text-sm">High Risk Orders</div>
+          <div className="text-3xl font-bold mt-2 text-red-400">
+            {stats?.high_risk_orders ?? "—"}
+          </div>
+        </div>
+
+        {/* High Risk % */}
+        <div className="bg-base-800 p-6 rounded-xl border border-base-700 shadow-card">
+          <div className="text-gray-400 text-sm">High Risk %</div>
+          <div className="text-3xl font-bold mt-2 text-yellow-300">
+            {stats
+              ? `${(stats.high_risk_ratio * 100).toFixed(1)}%`
+              : "—"}
+          </div>
+        </div>
+
+        {/* Peak Order Risk */}
+        <div className="bg-base-800 p-6 rounded-xl border border-base-700 shadow-card">
+          <div className="text-gray-400 text-sm">Peak Order Risk</div>
+          <div className="text-3xl font-bold mt-2 text-red-300">
+            {stats?.max_risk ?? "—"}
+          </div>
+        </div>
+      </div>
+
+      {/* ALERTS */}
+        <div className=" bg-base-800 p-6 rounded-xl border border-base-700 shadow-card">
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-gray-300 text-sm font-medium">
+              Risk Alerts
+            </div>
+            <span className="text-xs text-gray-400">
+              {stats?.alerts?.length ?? 0} active
+            </span>
+          </div>
+
+          {stats?.alerts?.length ? (
+            <ol className="space-y-3 max-h-56 overflow-y-auto pr-2 list-decimal list-inside">
+              {stats.alerts.map((a, i) => (
+                <li
+                  key={i}
+                  className="text-base leading-snug text-red-300"
+                >
+                  {a.message}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div className="text-sm text-green-400">
+              ✓ No critical risk alerts detected
+            </div>
+          )}
+        </div>
 
       {/* TREND + TOP SELLERS */}
       <div className="grid grid-cols-3 gap-6">

@@ -8,14 +8,13 @@ from utils import (
     load_sellers,
     load_orders,
     load_batch_predictions,
-    predict_single_order,
-    log_prediction,
     compute_marketplace_stats,
     compute_category_risk,
     compute_seller_trend,
     compute_category_trend,
     load_model_stats,
-    get_seller_marketplace
+    get_seller_marketplace,
+    explain_seller_risk,
 )
 
 app = Flask(__name__)
@@ -113,38 +112,6 @@ def seller_model_stats():
     return jsonify(stats)
 
 
-@app.route("/predict_seller_order", methods=["POST"])
-def predict_seller_order():
-    from datetime import datetime
-
-    payload = request.json or {}
-    seller_id = payload.get("seller_id")
-    order = payload.get("order")
-
-    if not seller_id or not order:
-        return jsonify({"error":"seller_id and order required"}), 400
-
-    marketplace = order.get("marketplace_id") or get_seller_marketplace(seller_id, DATA_DIR)
-    order["marketplace_id"] = marketplace
-
-    order["Order_ID"] = order.get("Order_ID") or f"GEN_{int(datetime.utcnow().timestamp())}"
-
-    allowed = [
-        "Product_Category","Product_Price","Discount_Applied",
-        "Delivery_Time_Days","Customer_Type","Payment_Method",
-        "Customer_Return_Rate","Product_Rating"
-    ]
-    clean_order = {col: order.get(col) for col in allowed}
-
-    model_path = os.path.join(MODELS_DIR, f"model_{seller_id}.joblib")
-    result = predict_single_order(clean_order, model_path)
-
-    order["seller_id"] = seller_id
-    log_prediction(order, result, DATA_DIR)
-
-    return jsonify(result)
-
-
 @app.route("/marketplace_category_trend")
 def marketplace_category_trend():
     """
@@ -167,6 +134,18 @@ def marketplace_category_trend():
 
     return jsonify(res)
 
+@app.route("/seller_explanation")
+def seller_explanation():
+    seller_id = request.args.get("seller_id")
+
+    if not seller_id:
+        return jsonify([])
+
+    orders = load_orders(DATA_DIR)
+    preds = load_batch_predictions(DATA_DIR)
+
+    reasons = explain_seller_risk(orders, preds, seller_id)
+    return jsonify(reasons)
 
 if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)

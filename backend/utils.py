@@ -74,83 +74,6 @@ def get_seller_marketplace(seller_id, data_dir):
 
 
 # ------------------------------------------------------------
-# Prediction & Logging
-# ------------------------------------------------------------
-
-def predict_single_order(order_dict, model_path):
-    if not os.path.exists(model_path):
-        return {"risk_score": 0.5, "risk_label": "Medium"}
-
-    bundle = joblib.load(model_path)
-    model = bundle["model"]
-    encoder = bundle["encoder"]
-    features = bundle["features"]
-
-    # Clean numeric data
-    o = dict(order_dict)
-    for col in ["Product_Price","Discount_Applied","Delivery_Time_Days",
-                "Customer_Return_Rate","Product_Rating"]:
-        try:
-            o[col] = float(o.get(col, 0))
-        except:
-            o[col] = 0.0
-
-    X = pd.DataFrame([o])
-    cat_cols = ["Product_Category","Customer_Type","Payment_Method"]
-
-    X_cat = encoder.transform(X[cat_cols])
-    X_num = X.drop(columns=cat_cols).select_dtypes(include=[float,int]).values
-    X_final = np.hstack([X_num, X_cat])
-
-    try:
-        proba = float(model.predict_proba(X_final)[0].max())
-        pred = int(model.predict(X_final)[0])
-    except:
-        pred = int(model.predict(X_final)[0])
-        proba = 0.9 if pred == 1 else 0.1
-
-    if proba > 0.75:
-        label = "High" if pred == 1 else "Low"
-    elif proba > 0.45:
-        label = "Medium"
-    else:
-        label = "Low"
-
-    return {"risk_score": proba, "risk_label": label}
-
-
-def log_prediction(order, result, data_dir):
-    path = os.path.join(data_dir, "batch_predictions.csv")
-
-    order_id = order.get("Order_ID") or f"GEN_{int(datetime.utcnow().timestamp())}"
-
-    row = {
-        "Order_ID": order_id,
-        "seller_id": order.get("seller_id", ""),
-        "marketplace_id": order.get("marketplace_id", ""),
-
-        # These fields FIX category risk
-        "Product_Category": order.get("Product_Category", ""),
-        "Customer_Type": order.get("Customer_Type", ""),
-        "Payment_Method": order.get("Payment_Method", ""),
-
-        "risk_score": result.get("risk_score"),
-        "risk_label": result.get("risk_label"),
-        "timestamp": datetime.utcnow().isoformat()
-    }
-
-    df = pd.DataFrame([row])
-
-    if os.path.exists(path):
-        existing = pd.read_csv(path)
-        final = pd.concat([existing, df], ignore_index=True)
-    else:
-        final = df
-
-    final.to_csv(path, index=False)
-
-
-# ------------------------------------------------------------
 # Aggregations
 # ------------------------------------------------------------
 
@@ -201,10 +124,20 @@ def compute_marketplace_stats(orders_df, preds_df, marketplace_id=None):
     else:
         top = []
 
+    if not p.empty:
+        high_risk_orders = int((p["risk_score"] >= 0.75).sum())
+        high_risk_ratio = float((p["risk_score"] >= 0.75).mean())
+        max_risk = float(p["risk_score"].max())
+    else:
+        high_risk_orders = 0
+        high_risk_ratio = 0.0
+        max_risk = 0.0
+
     # ---------------------------------------------------------
     # NEW: Marketplace Health Score
     # ---------------------------------------------------------
     health_score = compute_marketplace_health(o, p)
+    alerts = compute_risk_alerts(p, o)
 
     return {
         "total_orders": int(total_orders),
@@ -213,6 +146,10 @@ def compute_marketplace_stats(orders_df, preds_df, marketplace_id=None):
         "category_risk": cat,
         "top_risky_sellers": top,
         "health_score": health_score,
+        "alerts": alerts,
+        "high_risk_orders": high_risk_orders,
+        "high_risk_ratio": round(high_risk_ratio, 3),
+        "max_risk": round(max_risk, 3),
     }
 
 
@@ -373,3 +310,71 @@ def compute_marketplace_health(o, p):
 
     return max(0, min(100, round(score)))
 
+def compute_risk_alerts(p, o):
+    alerts = []
+
+    if p.empty:
+        return alerts
+
+    # -------------------------------
+    # Seller-based alerts (COUNT, not mean)
+    # -------------------------------
+    seller_stats = p.groupby("seller_id").agg(
+        high_risk_count=("risk_score", lambda x: (x >= 0.75).sum()),
+        total_orders=("risk_score", "count")
+    ).reset_index()
+
+    for _, row in seller_stats.iterrows():
+        ratio = row["high_risk_count"] / row["total_orders"]
+        if row["high_risk_count"] >= 10 and ratio >= 0.25:
+            alerts.append({
+                "type": "seller",
+                "message": (
+                    f"Seller {row['seller_id']} has "
+                    f"{row['high_risk_count']} high-risk orders "
+                    f"({ratio*100:.1f}%)"
+                )
+            })
+
+    # -------------------------------
+    # Category-based alerts (COUNT, not mean)
+    # -------------------------------
+    cat_stats = p.groupby("Product_Category").agg(
+        high_risk_count=("risk_score", lambda x: (x >= 0.75).sum()),
+        total_orders=("risk_score", "count")
+    )
+
+    for cat, row in cat_stats.iterrows():
+        ratio = row["high_risk_count"] / row["total_orders"]
+        if ratio >= 0.3:
+            alerts.append({
+                "type": "category",
+                "message": (
+                    f"{cat} category has "
+                    f"{ratio*100:.1f}% high-risk orders"
+                )
+            })
+
+    return alerts
+
+def explain_seller_risk(orders_df, preds_df, seller_id):
+    sdf = orders_df[orders_df["seller_id"] == seller_id]
+    pdf = preds_df[preds_df["seller_id"] == seller_id]
+
+    reasons = []
+
+    if not sdf.empty:
+        if sdf["Returned"].astype(float).mean() > 0.3:
+            reasons.append("High return rate")
+
+        if (sdf["Payment_Method"] == "COD").mean() > 0.5:
+            reasons.append("High COD usage")
+
+        if sdf["Product_Rating"].astype(float).mean() < 3:
+            reasons.append("Low average product rating")
+
+    if not pdf.empty:
+        if pdf["risk_score"].mean() > 0.7:
+            reasons.append("Consistently high predicted risk")
+
+    return reasons

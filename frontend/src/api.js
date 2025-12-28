@@ -19,26 +19,8 @@ export const getSellerTrend = (sid) =>
 export const getSellerModelStats = (sid) =>
   axios.get(`${BASE}/seller_model_stats`, { params: { seller_id: sid } });
 
-export const predictOrder = (sid, order) => {
-  const allowed = [
-    "Product_Category",
-    "Product_Price",
-    "Discount_Applied",
-    "Delivery_Time_Days",
-    "Customer_Type",
-    "Payment_Method",
-    "Customer_Return_Rate",
-    "Product_Rating"
-  ];
-
-  const cleanOrder = {};
-  allowed.forEach(k => cleanOrder[k] = order[k]);
-
-  return axios.post(`${BASE}/predict_seller_order`, {
-    seller_id: sid,
-    order: cleanOrder
-  });
-};
+export const getSellerExplanation = (sid) =>
+  axios.get(`${BASE}/seller_explanation`, { params: { seller_id: sid } });
 
 export function getCategoryTrend(marketplaceId, category = "") {
   const params = new URLSearchParams();

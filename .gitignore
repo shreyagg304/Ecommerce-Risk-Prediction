@@ -3,3 +3,17 @@ backend/venv/
 node_modules/
 venv/
 .env
+
+# Ignore generated data files
+backend/data/*.csv
+backend/data/*.json
+backend/data/*.xlsx
+backend/data/*.parquet
+
+# Ignore model binaries
+backend/models/*.joblib
+backend/models/*.pkl
+
+# Python cache
+__pycache__/
+*.pyc

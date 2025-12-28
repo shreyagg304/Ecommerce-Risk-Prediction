@@ -3,7 +3,7 @@ import {
   getSellerOrders,
   getSellerTrend,
   getSellerModelStats,
-  predictOrder
+  getSellerExplanation,
 } from "../api";
 import {
   LineChart,
@@ -18,16 +18,16 @@ export default function SellerDashboard({ sellerId, marketplaceId, onBack }) {
   const [orders, setOrders] = useState([]);
   const [trend, setTrend] = useState([]);
   const [modelStats, setModelStats] = useState(null);
-  const [toast, setToast] = useState(null);
 
-  // ░░ Pagination ░░
+  // Pagination
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  // ░░ Filters ░░
+  // Filters
   const [filterCategory, setFilterCategory] = useState("");
   const [filterReturned, setFilterReturned] = useState("");
   const [filterPayment, setFilterPayment] = useState("");
+  const [explanation, setExplanation] = useState([]);
 
   useEffect(() => {
     if (!sellerId) return;
@@ -44,30 +44,23 @@ export default function SellerDashboard({ sellerId, marketplaceId, onBack }) {
     getSellerModelStats(sellerId).then((r) =>
       setModelStats(r.data || null)
     );
+
+    getSellerExplanation(sellerId).then((r) =>
+      setExplanation(Array.isArray(r.data) ? r.data : [])
+    );
   }, [sellerId]);
 
-  const handlePredict = async () => {
-    if (!orders.length) return;
-
-    const sample = orders.find((o) => o.Order_ID);
-    if (!sample) return;
-
-    const res = await predictOrder(sellerId, sample);
-
-    setToast(`Predicted: ${res.data.risk_label} (${res.data.risk_score.toFixed(2)})`);
-    setTimeout(() => setToast(null), 2500);
-
-    getSellerTrend(sellerId).then((r) =>
-      setTrend(Array.isArray(r.data) ? r.data : [])
-    );
-  };
-
-  // FILTERS
+  // FILTERING
   let filtered = [...orders];
 
-  if (filterCategory) filtered = filtered.filter((o) => o.Product_Category === filterCategory);
-  if (filterReturned) filtered = filtered.filter((o) => o.Returned == filterReturned);
-  if (filterPayment) filtered = filtered.filter((o) => o.Payment_Method === filterPayment);
+  if (filterCategory)
+    filtered = filtered.filter((o) => o.Product_Category === filterCategory);
+
+  if (filterReturned)
+    filtered = filtered.filter((o) => o.Returned == filterReturned);
+
+  if (filterPayment)
+    filtered = filtered.filter((o) => o.Payment_Method === filterPayment);
 
   const totalPages = Math.ceil(filtered.length / pageSize);
   const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
@@ -79,14 +72,7 @@ export default function SellerDashboard({ sellerId, marketplaceId, onBack }) {
   return (
     <div className="space-y-10 text-gray-200">
 
-      {/* TOAST */}
-      {toast && (
-        <div className="fixed top-4 right-4 bg-brand-600 px-4 py-2 rounded-lg text-white shadow-lg z-50">
-          {toast}
-        </div>
-      )}
-
-      {/* BACK BUTTON */}
+      {/* BACK */}
       <button
         onClick={() => onBack(marketplaceId)}
         className="text-brand-400 hover:text-brand-300"
@@ -97,9 +83,9 @@ export default function SellerDashboard({ sellerId, marketplaceId, onBack }) {
       <h2 className="text-3xl font-bold">Seller {sellerId}</h2>
 
       {/* METRICS + TREND */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 gap-6">
         
-        {/* METRICS CARD */}
+        {/* MODEL METRICS */}
         <div className="bg-base-800 p-6 rounded-xl border border-base-700 shadow-card">
           <h4 className="text-xl font-semibold mb-3 text-gray-100">Model Metrics</h4>
 
@@ -115,32 +101,38 @@ export default function SellerDashboard({ sellerId, marketplaceId, onBack }) {
           )}
         </div>
 
-        {/* RISK TREND */}
-        <div className="col-span-2 bg-base-800 p-6 rounded-xl border border-base-700 shadow-card">
-          <h4 className="text-xl font-semibold mb-3 text-gray-100">Risk Trend</h4>
+        <div className="bg-base-800 p-6 rounded-xl border border-base-700 shadow-card">
+          <h4 className="text-xl font-semibold mb-3">Risk Drivers</h4>
 
-          {trend?.length ? (
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={trend}>
-                <XAxis dataKey="date" stroke="#64748b" />
-                <YAxis stroke="#64748b" />
-                <Tooltip cursor={{ fill: "#1e293b33" }} />
-                <Line type="monotone" dataKey="avg_risk" stroke="#60A5FA" strokeWidth={3} />
-              </LineChart>
-            </ResponsiveContainer>
+          {explanation.length ? (
+            <ul className="list-disc list-inside text-gray-300 space-y-1">
+              {explanation.map((r, i) => (
+                <li key={i}>{r}</li>
+              ))}
+            </ul>
           ) : (
-            <div className="text-gray-500 py-10 text-center">No trend data</div>
+            <div className="text-gray-500">No dominant risk factors detected</div>
           )}
         </div>
       </div>
 
-      {/* Predict Button */}
-      <button
-        onClick={handlePredict}
-        className="px-5 py-2 bg-brand-600 hover:bg-brand-500 rounded-lg text-white shadow-md"
-      >
-        Predict Sample Order
-      </button>
+      {/* TREND */}
+      <div className="col-span-2 bg-base-800 p-6 rounded-xl border border-base-700 shadow-card">
+        <h4 className="text-xl font-semibold mb-3 text-gray-100">Risk Trend</h4>
+
+        {trend?.length ? (
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={trend}>
+              <XAxis dataKey="date" stroke="#64748b" />
+              <YAxis stroke="#64748b" />
+              <Tooltip cursor={{ fill: "#1e293b33" }} />
+              <Line type="monotone" dataKey="avg_risk" stroke="#60A5FA" strokeWidth={3} />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="text-gray-500 py-10 text-center">No trend data</div>
+        )}
+      </div>
 
       {/* FILTERS */}
       <div className="flex gap-4 mt-6">
