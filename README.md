@@ -8,17 +8,17 @@ ReturnRisk simulates how large e-commerce platforms monitor return risk at scale
 
 ## It provides:
 
-Marketplace-level risk insights
+* Marketplace-level risk insights
 
-Seller-level risk trends and explanations
+* Seller-level risk trends and explanations
 
-Category-wise risk analysis
+* Category-wise risk analysis
 
-Alerting for high-risk sellers and categories
+* Alerting for high-risk sellers and categories
 
-Time-based trend filtering (Last 7 / 30 / 90 days)
+* Time-based trend filtering (Last 7 / 30 / 90 days)
 
-All data is generated synthetically to demonstrate real-world workflows.
+* All data is generated synthetically to demonstrate real-world workflows.
 
 # 🧠 Key Features
 Marketplace Dashboard
