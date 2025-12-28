@@ -53,11 +53,11 @@ All data is generated synthetically to demonstrate real-world workflows.
 
   * Consistently high predicted risk
 
-* Time-Based Filtering
+## Time-Based Filtering
 
-  * Supports Last 7 / 30 / 90 days
+* Supports Last 7 / 30 / 90 days
 
-  * Filters are computed relative to the latest available dataset date, mimicking batch analytics systems used in production
+* Filters are computed relative to the latest available dataset date, mimicking batch analytics systems used in production
 
 # 🏗️ Architecture
 
