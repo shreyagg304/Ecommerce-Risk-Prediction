@@ -6,7 +6,7 @@ A full-stack analytics system that predicts, monitors, and explains order return
 
 ReturnRisk simulates how large e-commerce platforms monitor return risk at scale.
 
-It provides:
+## It provides:
 
 Marketplace-level risk insights
 
@@ -61,7 +61,7 @@ Filters are computed relative to the latest available dataset date, mimicking ba
 
 # 🏗️ Architecture
 
-Frontend
+## Frontend
 
 React
 
@@ -71,7 +71,7 @@ Tailwind CSS
 
 Deployed on Vercel
 
-Backend
+## Backend
 
 Flask
 
@@ -97,7 +97,7 @@ Seller-specific Random Forest models
 
 Predicts probability of order return
 
-Trained on:
+## Trained on:
 
 Product category
 
@@ -111,7 +111,7 @@ Payment method
 
 Product rating
 
-Model metrics exposed per seller:
+## Model metrics exposed per seller:
 
 Accuracy
 
@@ -123,7 +123,7 @@ F1 score
 
 # 📊 Risk Alerts
 
-The system automatically flags:
+## The system automatically flags:
 
 Sellers with consistently high average risk
 
@@ -146,14 +146,14 @@ Health Check: /health
 (Frontend deployed separately)
 
 # 🛠️ Local Setup
-Backend
+## Backend
 ```bash
 cd backend
 pip install -r requirements.txt
 python generate_mock_data.py
 python app.py
 ```
-Frontend
+## Frontend
 ```bash
 cd frontend
 npm install
